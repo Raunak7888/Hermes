@@ -1,0 +1,10 @@
+{
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "deploy": {
+      "startCommand": "java -jar app.jar",
+      "restartPolicyType": "ALWAYS"
+    }
+  }
+  
