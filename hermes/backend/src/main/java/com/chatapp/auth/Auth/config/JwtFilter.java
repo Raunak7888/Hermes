@@ -1,11 +1,12 @@
 package com.chatapp.auth.Auth.config;
 
 import com.chatapp.auth.Auth.service.JwtService;
-import com.chatapp.auth.model.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +16,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
+    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
@@ -37,40 +39,52 @@ public class JwtFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
+        log.info("➡️ Starting JWT filter for request URI: {}", request.getRequestURI());
 
-        // Check for Bearer token in Authorization header
+        final String authHeader = request.getHeader("Authorization");
+        log.debug("Authorization header: {}", authHeader);
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.debug("No valid Authorization header found or it's not a 'Bearer' token. Skipping JWT filter and continuing the filter chain.");
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwtToken = authHeader.substring(7); // Remove "Bearer " prefix
+        final String jwt = authHeader.substring(7);
+        log.info("JWT Token extracted: {}", jwt);
+
         try {
-            String username = jwtService.extractUsername(jwtToken);
+            String username = jwtService.extractUsername(jwt);
+            log.info("Extracted username from JWT: {}", username);
 
-            // Ensure the user is not already authenticated in the SecurityContext
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                log.debug("Username found and no existing authentication in the SecurityContext. Loading user details.");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                log.info("User details loaded successfully for username: {}", username);
 
-                // Validate JWT token against the user details
-                if (jwtService.isTokenValid(jwtToken, (User) userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    log.info("✅ JWT token is valid. Creating and setting new authentication token.");
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    log.debug("Authentication token details built from request.");
 
-                    // Set authentication in the security context
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.info("Security context updated with authentication for user: {}", username);
+                } else {
+                    log.warn("❌ JWT token for user '{}' is invalid. It might be expired or malformed.", username);
                 }
+            } else {
+                log.debug("Username not found in token or SecurityContext already has an authentication. Skipping authentication update.");
             }
         } catch (Exception e) {
-            // Log the exception and resolve it through HandlerExceptionResolver
+            log.error("❌ JWT authentication failed for request URI {}: {}", request.getRequestURI(), e.getMessage(), e);
             handlerExceptionResolver.resolveException(request, response, null, e);
-            return; // Exit early on exception
+            return;
         }
 
-        // Continue filter chain after successful processing
+        log.info("✅ JWT filter finished. Continuing the filter chain for request: {}", request.getRequestURI());
         filterChain.doFilter(request, response);
     }
 }

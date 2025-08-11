@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: chatapp-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password123
+      MYSQL_DATABASE: hermesdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - chatnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    image: hermes
+    container_name: chatapp-backend
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/hermesdb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password123
+      MAIL_USERNAME: forlearning8080@gmail.com
+      MAIL_PASSWORD: ydnwhvuvpmvviaob
+      JWT_SECRET: LKn+0r4zZ9J9zp/NMCUvyy3TIbAD5ayzHyxpg5OGswo=
+      ALLOWED_ORIGINS: http://localhost:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - chatnet
+
+volumes:
+  mysql_data:
+
+networks:
+  chatnet:

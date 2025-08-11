@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Controller
 public class ChatController {
@@ -88,8 +89,6 @@ public class ChatController {
     public void sendImage(ClientFileDTO fileDTO) {
 
         Boolean isGroup = Boolean.parseBoolean(fileDTO.getIsGroup());
-        System.out.println("TempID: "+fileDTO.getTempId() + " Group hai ki Nahi: " + isGroup);
-        System.out.println(isGroup);
         if (fileDTO.getFile() == null || fileDTO.getUserId() == null || fileDTO.getReceiverId() == null) {
             logger.error("Invalid input: fileDTO or required fields are null");
             throw new IllegalArgumentException("Invalid input: fileDTO or required fields are null");
@@ -106,12 +105,14 @@ public class ChatController {
             Message message = messageService.imageDetail(fileDTO.getUserId(), fileDTO.getReceiverId(), savedUploadedFile);
             
             logger.info("Image details saved successfully for Sender ID: {}, Receiver ID: {}", fileDTO.getUserId(), fileDTO.getReceiverId());
-            
-            String receiverDestination = "/topic/user/" + fileDTO.getReceiverId() + "/queue/private";
-            
-            messagingTemplate.convertAndSend(receiverDestination, convertToDTO(message,fileDTO.getTempId(), savedUploadedFile.getName()));
-            
-            logger.info("Image sent successfully to Receiver ID: {}", fileDTO.getReceiverId());
+
+            if(!fileDTO.getUserId().equals(fileDTO.getReceiverId())){
+                String receiverDestination = "/topic/user/" + fileDTO.getReceiverId() + "/queue/private";
+
+                messagingTemplate.convertAndSend(receiverDestination, convertToDTO(message,fileDTO.getTempId(), savedUploadedFile.getName()));
+
+                logger.info("Image sent successfully to Receiver ID: {}", fileDTO.getReceiverId());
+            }
             
             FileAcknowledgmentDTO acknowledgment = new FileAcknowledgmentDTO(
                     message.getId(),

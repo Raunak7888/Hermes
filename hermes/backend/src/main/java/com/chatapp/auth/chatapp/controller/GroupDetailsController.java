@@ -29,7 +29,6 @@ public class GroupDetailsController {
     @PostMapping("/auth/create")
     public ResponseEntity<GroupDetails> createGroup(@RequestBody CreateGroupDTO request) {
         // Log for debugging
-        System.out.println("Request received to create group: " + request.getGroupName());
 
         // Call the service to create the group with members
         GroupDetails groupDetails = groupDetailsService.createGroup(
@@ -39,7 +38,6 @@ public class GroupDetailsController {
         );
 
         // Log for debugging
-        System.out.println("Group created successfully: " + groupDetails.getGroupName());
 
         // Return the created group
         return ResponseEntity.ok(groupDetails);

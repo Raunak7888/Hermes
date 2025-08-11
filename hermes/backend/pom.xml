@@ -11,8 +11,8 @@
 	<groupId>com.chatapp</groupId>
 	<artifactId>chatapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Chat App</name>
-	<description>Demo project for Spring Boot</description>
+	<name>Hermes</name>
+	<description>Chat Application using websocket</description>
 	<url/>
 	<licenses>
 		<license/>

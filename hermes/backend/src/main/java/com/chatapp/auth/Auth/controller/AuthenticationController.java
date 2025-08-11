@@ -60,10 +60,8 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginUserDto dto) {
-        System.out.println(dto.getEmail());
         User authenticatedUser = authenticationService.authenticate(dto);
         String token = jwtService.generateToken(authenticatedUser);
-        System.out.println(token);
         LoginResponse loginResponse = new LoginResponse(token, jwtService.getExpirationTime());
         return ResponseEntity.ok(loginResponse);
     }
@@ -121,44 +119,32 @@ public class AuthenticationController {
     // src/main/java/com/example/controller/UserController.java
 //    @GetMapping("/Data/Search")
 //    public List<Object> searchUsers(@RequestParam String query) {
-//        System.out.println(query);
 //        return getUserDataService.searchUsers(query);
 //    }
 
     @GetMapping("/Data/Search")
     public List<Object> searchUsersAndGroups(@RequestParam String query) {
-        System.out.println("Search query: " + query);
         return getUserDataService.searchUsersAndGroups(query);
     }
 
 
     @GetMapping("/api/user")
     public String getCurrentUserId(@RequestParam(value = "authorizationHeader", required = false) String authorizationHeader) {
-        logger.info("Authorization Token: {}", authorizationHeader); // Log the token
-        System.out.println(authorizationHeader);
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer")) {
+        if (authorizationHeader == null ) {
             logger.warn("Missing or malformed Authorization token");
             return "Missing or malformed Authorization token";
         }
 
-        String token = authorizationHeader.substring(9); // Remove "Bearer " prefix
-        logger.debug("Extracted token: {}", token); // Debug the token
-
         try {
-            String currentUsername = jwtService.extractUsername(token); // Assuming this extracts user ID
-            String currentUserId = String.valueOf(currentUserService.getCurrentUserIdWithUsername(currentUsername));
-            System.out.println("Current User: "+currentUsername);
-            System.out.println("Current User ID: "+currentUserId);
-            logger.info("Extracted User ID: {}", currentUserId); // Log user ID
-            return currentUserId;
+            String currentUsername = jwtService.extractUsername(authorizationHeader); // Assuming this extracts user ID
+            if (currentUsername == null || currentUsername.isEmpty()) {
+                logger.warn("Invalid token: No username found");
+                return "Invalid token";
+            }
+            return String.valueOf(currentUserService.getCurrentUserIdWithUsername(currentUsername));
         } catch (Exception e) {
-            logger.error("Error extracting user ID: {}", e.getMessage());
+            logger.error("Error extracting user ID: {}",e.getMessage());
             return "Invalid token";
         }
     }
-
-
-
-
 }

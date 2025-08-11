@@ -1,10 +1,15 @@
 package com.chatapp.auth.chatapp.controller;
 
 import com.chatapp.auth.chatapp.DTO.FileDTO;
+import com.chatapp.auth.chatapp.service.FileService;
+import com.chatapp.auth.model.Message;
+import com.chatapp.auth.model.UploadedFile;
+import com.chatapp.auth.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +28,7 @@ public class FileController {
 //    @PostMapping("/files/upload")
 //    public ResponseEntity<UploadedFile> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId, @RequestParam("receiverId") Long receiverId) {
 //        try {
-//            UploadedFile savedUploadedFile = fileService.storeFile(file, userId, receiverId);
+//            UploadedFile savedUploadedFile = fileService.storeFile(file);
 //            Message message = new Message();
 //            message.setContent("---FILE---");
 //            message.setSenderId(userId);
@@ -53,7 +58,6 @@ public class FileController {
                         .body(null); // Return 404 if the file is not found
             }
         } catch (IOException e) {
-            System.out.println("Error Message: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(null);
         }

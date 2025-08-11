@@ -29,16 +29,14 @@ public class FileService {
     }
 
     public UploadedFile storeFile(MultipartFile file) throws IOException {
-        System.out.println("in the store file: " + file.getOriginalFilename() + " " + file.getSize());
 
         // Generate a random filename with the original file name
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         fileName = fileName.replaceAll("\\s", "_");
-        System.out.println("file name: " + fileName);
+
 
         // Define the target location with the file name appended
         Path targetLocation = Paths.get(uploadDir).toAbsolutePath().normalize().resolve(fileName);
-        System.out.println("target location: " + targetLocation);
 
         try {
             // Copy the file to the target location
@@ -58,7 +56,6 @@ public class FileService {
         uploadedFileEntity.setSize(file.getSize());
         uploadedFileEntity.setUrl("/uploads/" + fileName);
         uploadedFileEntity.setUpload_time(LocalDateTime.now());
-        System.out.println("save to database");
 
         return filesRepository.save(uploadedFileEntity);
     }

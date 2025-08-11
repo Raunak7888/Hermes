@@ -31,22 +31,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Use CorsConfigurationSource here
-            .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for APIs
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
-            .authenticationProvider(authenticationProvider)
-            .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/auth/**").permitAll() // Public authentication endpoints
-                    .requestMatchers("/chat/**").permitAll() // WebSocket endpoints
-                    .anyRequest().authenticated() // All other requests require authentication
-            )
-            .headers(headers -> headers
-                    .defaultsDisabled()
-                    .frameOptions(Customizer.withDefaults()) // Prevent Clickjacking
-                    .xssProtection(Customizer.withDefaults()) // XSS protection
-                    .cacheControl(Customizer.withDefaults()) // Cache control headers for security
-            )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS for frontend
+                .csrf(AbstractHttpConfigurer::disable) // ✅ Disable CSRF
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ✅ Stateless
+                .authenticationProvider(authenticationProvider)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/auth/**",     // ✅ Public auth routes
+                                "/chat/**",     // ✅ WebSocket handshake
+                                "/ws/**",       // ✅ In case you're using STOMP messages here
+                                "/error",       // ✅ Let Spring Boot error controller work
+                                "/favicon.ico"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .headers(headers -> headers
+                        .defaultsDisabled()
+                        .frameOptions(Customizer.withDefaults())
+                        .xssProtection(Customizer.withDefaults())
+                        .cacheControl(Customizer.withDefaults())
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // ✅ Custom JWT filter
 
         return http.build();
     }
@@ -54,13 +59,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("https://*.github.dev","https://frontend-production-83c3.up.railway.app")); // Allow matching origins
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept")); // Allowed headers
-        configuration.setAllowCredentials(true); // Allow credentials
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173","http://127.0.0.1:5500")); // ✅ Your Vite frontend
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+        configuration.setAllowCredentials(true); // ✅ Needed for cookies and token auth
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Apply to all endpoints
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

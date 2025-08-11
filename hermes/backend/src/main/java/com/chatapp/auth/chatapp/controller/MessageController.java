@@ -32,19 +32,19 @@ public class MessageController {
 
             if (isGroup) {
                 List<Group> groupMessages = messageService.getGroupsMessages(receiverId, startDateTime, endDateTime);
-                return ResponseEntity.ok(groupMessages); // Add similar logic for group messages if needed
+                return ResponseEntity.ok(groupMessages);
             } else {
                 List<Message> userMessages = messageService.getMessagesBetweenUsers(senderId, receiverId, startDateTime, endDateTime);
 
                 // Convert to DTO
                 List<MessageDTO> response = userMessages.stream()
                         .map(MessageDTO::new)
+
                         .toList();
 
                 return ResponseEntity.ok(response);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching messages and files.");
         }
     }

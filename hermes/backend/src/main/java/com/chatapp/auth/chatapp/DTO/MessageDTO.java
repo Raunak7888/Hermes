@@ -34,7 +34,7 @@ public class MessageDTO {
     private Long tempId;
 
     private String fileName;
-
+    private String status = "sent";
     public MessageDTO(Message message) {
         this.id = message.getId();
         this.content = message.getContent();

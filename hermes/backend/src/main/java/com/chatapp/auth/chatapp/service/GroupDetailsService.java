@@ -56,7 +56,6 @@ public class GroupDetailsService {
     }
 
     public void saveMessage(GroupDTO groupDTO) {
-        System.out.println(groupDTO.getGroupId() + ", " + groupDTO.getContent() + ", " + groupDTO.getSenderId());
         GroupDetails groupDetails = groupDetailsRepository.findById(groupDTO.getGroupId())
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
         Group message = new Group(
