@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class GroupDTO {
     @NotNull(message = "Content cannot be null")
     private String content;
-
+    private String senderName;
     private LocalDateTime timestamp;
 
     @NotNull(message = "Sender ID cannot be null")

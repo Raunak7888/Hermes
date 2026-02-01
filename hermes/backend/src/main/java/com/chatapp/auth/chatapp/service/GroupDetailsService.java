@@ -62,6 +62,8 @@ public class GroupDetailsService {
                 groupDTO.getContent(),
                 groupDetails,
                 groupDTO.getSenderId()
+
+
         );
         message.setTimestamp(LocalDateTime.now());
         groupRepository.save(message);

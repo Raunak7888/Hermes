@@ -5,6 +5,10 @@ import com.chatapp.auth.chatapp.DTO.GroupDTO;
 import com.chatapp.auth.chatapp.DTO.MessageAcknowledgmentDTO;
 import com.chatapp.auth.model.GroupDetails;
 import com.chatapp.auth.chatapp.service.GroupDetailsService;
+import com.chatapp.auth.model.User;
+import com.chatapp.auth.repository.MessageRepository;
+import com.chatapp.auth.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +19,23 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class GroupDetailsController {
-    private static final Logger logger = LoggerFactory.getLogger(GroupDetailsController.class);
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(GroupDetailsController.class);
 
     private final SimpMessagingTemplate messagingTemplate;
     private final GroupDetailsService groupDetailsService;
+    private final UserRepository userRepository;
 
-    public GroupDetailsController(SimpMessagingTemplate messagingTemplate, GroupDetailsService groupDetailsService) {
+    public GroupDetailsController(
+            SimpMessagingTemplate messagingTemplate,
+            GroupDetailsService groupDetailsService,
+            UserRepository userRepository
+    ) {
         this.messagingTemplate = messagingTemplate;
         this.groupDetailsService = groupDetailsService;
+        this.userRepository = userRepository;
     }
-
 
     @PostMapping("/auth/create")
     public ResponseEntity<GroupDetails> createGroup(@RequestBody CreateGroupDTO request) {
@@ -49,8 +60,18 @@ public class GroupDetailsController {
                 groupDTO.getContent(), groupDTO.getSenderId(), groupDTO.getGroupId());
         try {
             // Save the message to the database
+
             groupDetailsService.saveMessage(groupDTO);
-            // Broadcast the saved message to the WebSocket topic
+            logger.info("Message successfully saved to group");
+
+            User sender = userRepository.findById(groupDTO.getSenderId())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + groupDTO.getSenderId()));
+
+
+            logger.info("Message successfully sent to group: {}",sender.getUsername());
+
+            groupDTO.setSenderName(sender.getUsername());
+
             messagingTemplate.convertAndSend("/topic/group/" + groupDTO.getGroupId(), groupDTO);
             logger.info("Message successfully sent to group: {}", groupDTO.getGroupId());
 
