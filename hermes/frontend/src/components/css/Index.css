@@ -1,0 +1,59 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light Mode Variables */
+:root {
+  --color-primary: #2563eb;       /* Tailwind's blue-600 */
+  --color-on-primary: #ffffff;    /* White text for primary button */
+  --color-on-background: #1f2937; /* Tailwind's gray-800 */
+  --color-background-default: #f9fafb; /* A subtle off-white background */
+  --color-background-form: #ffffff;    /* Pure white for the form card */
+  --color-gradient-start: #eff6ff;     /* Tailwind's blue-50 */
+  --color-gradient-end: #e0e7ff;       /* Tailwind's indigo-100 */
+  --color-text-muted: #6b7280;    /* Tailwind's gray-600 */
+  --color-icon: #60a5fa;         /* Tailwind's blue-400 */
+}
+
+/* Dark Mode Variables */
+.dark {
+  --color-primary: #3b82f6;       /* Tlwind's blue-500 */
+  --color-on-primary: #ffffff;
+  --color-on-background: #d1d5db; /* A lighter gray for dark mode text */
+  --color-background-default: #111827; /* Tailwind's gray-900 */
+  --color-background-form: #1f2937;    /* A slightly lighter gray for the form card */
+  --color-gradient-start: #111827;     /* Dark background start */
+  --color-gradient-end: #000000;       /* Black background end */
+  --color-text-muted: #9ca3af;    /* A lighter gray for muted text */
+  --color-icon: #60a5fa;         /* Same icon color */
+}
+
+.messageScrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messageScrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messageScrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5); /* slate-500/50 */
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+.messageScrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.7); /* slate-500/70 */
+}
+
+@media (prefers-color-scheme: dark) {
+  .messageScrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(203, 213, 225, 0.2); /* slate-200/20 */
+  }
+
+  .messageScrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(203, 213, 225, 0.4); /* slate-200/40 */
+  }
+}
