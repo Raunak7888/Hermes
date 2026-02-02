@@ -39,7 +39,6 @@ public class MessageController {
                 // Convert to DTO
                 List<MessageDTO> response = userMessages.stream()
                         .map(MessageDTO::new)
-
                         .toList();
 
                 return ResponseEntity.ok(response);

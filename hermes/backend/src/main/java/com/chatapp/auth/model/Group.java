@@ -24,6 +24,8 @@ public class Group {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    private String senderName;
+
     @Column(name = "sender_id", nullable = false)
     private Long senderId; // ID of the message sender
 
